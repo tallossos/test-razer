@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# This value is default but we need it below
+DEB_DESTDIR=$(CURDIR)/debian/tmp
+
+%:
+	dh $@ --with python3,dkms
+
+override_dh_auto_clean:
+	echo "No need to clean DKMS modules at packages build time."
+	echo "DKMS modules are built at packages installation time."
+
+override_dh_auto_build:
+	echo "No need to build DKMS modules at packages build time."
+	echo "DKMS modules are built at packages installation time."
+
+override_dh_auto_install:
+	$(MAKE) ubuntu_install install-systemd DESTDIR=$(DEB_DESTDIR)
+
+override_dh_install:
+	dh_install --package=openrazer-daemon usr/share/dbus-1/services/org.razer.service
+	dh_install --package=openrazer-daemon usr/lib/systemd/user/openrazer-daemon.service
+	dh_install --remaining-packages
+
+override_dh_dkms:
+	dh_dkms -p openrazer-driver-dkms -- install_files/dkms/dkms.conf
